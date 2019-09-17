@@ -23,8 +23,7 @@ def create_spark_session():
 
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
-    song_data = 
-    
+    '''
     # read song data file
     df = 
 
@@ -39,9 +38,10 @@ def process_song_data(spark, input_data, output_data):
     
     # write artists table to parquet files
     artists_table
-
+    '''
 
 def process_log_data(spark, input_data, output_data):
+    '''
     # get filepath to log data file
     log_data =
 
@@ -79,15 +79,42 @@ def process_log_data(spark, input_data, output_data):
 
     # write songplays table to parquet files partitioned by year and month
     songplays_table
+    '''
+
+def process_data(spark, filepath, func):
+    '''
+    Given directory, apply function across each file found
+    Args:
+        cur : sql execution against database
+        conn : connection to Postgres instance
+        filepath (str): path of the root directory
+        func : function applied to each file given
+    '''
+    all_files = []
+    for root, dirs, files in os.walk(filepath):
+        files = glob.glob(os.path.join(root,'*.json'))
+        for f in files :
+            all_files.append(os.path.abspath(f))
+
+    num_files = len(all_files)
+    print('{} files found in {}'.format(num_files, filepath))
+    for i, datafile in enumerate(all_files, 1):
+        func(spark, datafile, None)
+        conn.commit()
+        print('{}/{} files processed.'.format(i, num_files))
 
 
 def main():
     spark = create_spark_session()
-    input_data = "s3a://udacity-dend/"
+    #input_data = "s3a://udacity-dend/"
+    input_data = "/data/song-data.zip"
     output_data = ""
     
-    process_song_data(spark, input_data, output_data)    
-    process_log_data(spark, input_data, output_data)
+    process_data(spark, filepath='data/song_data', func=process_song_data)
+
+    #process_song_data(spark, input_data, output_data)    
+    #process_log_data(spark, input_data, output_data)
+
 
 
 if __name__ == "__main__":
