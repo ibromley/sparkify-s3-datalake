@@ -9,8 +9,10 @@ from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, dat
 config = configparser.ConfigParser()
 config.read('dl.cfg')
 
-os.environ['AWS_ACCESS_KEY_ID']=config['AWS_ACCESS_KEY_ID']
-os.environ['AWS_SECRET_ACCESS_KEY']=config['AWS_SECRET_ACCESS_KEY']
+os.environ['AWS_ACCESS_KEY_ID'] = config.get('AWS', 'AWS_ACCESS_KEY_ID')
+os.environ['AWS_SECRET_ACCESS_KEY'] = config.get('AWS', 'AWS_SECRET_ACCESS_KEY')
+#os.environ['AWS_ACCESS_KEY_ID']=config['AWS_ACCESS_KEY_ID']
+#os.environ['AWS_SECRET_ACCESS_KEY']=config['AWS_SECRET_ACCESS_KEY']
 
 
 def create_spark_session():
@@ -41,16 +43,18 @@ def process_song_data(spark, input_data, output_data):
     '''
 
 def process_log_data(spark, input_data, output_data):
-    '''
+    
     # get filepath to log data file
-    log_data =
+    log_data = input_data + 'log-data/2018/11/2018-11-30-events.json'
 
     # read log data file
-    df = 
+    df = spark.read.json(log_data)
+    df.printSchema()
     
     # filter by actions for song plays
-    df = 
-
+    df.select("method").dropDuplicates().show()
+    df.take(5).show()
+    '''
     # extract columns for users table    
     artists_table = 
     
@@ -81,39 +85,13 @@ def process_log_data(spark, input_data, output_data):
     songplays_table
     '''
 
-def process_data(spark, filepath, func):
-    '''
-    Given directory, apply function across each file found
-    Args:
-        cur : sql execution against database
-        conn : connection to Postgres instance
-        filepath (str): path of the root directory
-        func : function applied to each file given
-    '''
-    all_files = []
-    for root, dirs, files in os.walk(filepath):
-        files = glob.glob(os.path.join(root,'*.json'))
-        for f in files :
-            all_files.append(os.path.abspath(f))
-
-    num_files = len(all_files)
-    print('{} files found in {}'.format(num_files, filepath))
-    for i, datafile in enumerate(all_files, 1):
-        func(spark, datafile, None)
-        conn.commit()
-        print('{}/{} files processed.'.format(i, num_files))
-
-
 def main():
     spark = create_spark_session()
-    #input_data = "s3a://udacity-dend/"
-    input_data = "/data/song-data.zip"
+    input_data = "s3a://udacity-dend/"
     output_data = ""
     
-    process_data(spark, filepath='data/song_data', func=process_song_data)
-
     #process_song_data(spark, input_data, output_data)    
-    #process_log_data(spark, input_data, output_data)
+    process_log_data(spark, input_data, output_data)
 
 
 
