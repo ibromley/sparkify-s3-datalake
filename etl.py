@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, col
-from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format
+from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format, from_unixtime
 
 
 config = configparser.ConfigParser()
@@ -52,26 +52,25 @@ def process_log_data(spark, input_data, output_data):
     df.printSchema()
     
     # filter by actions for song plays
-    df.select("method").dropDuplicates().show()
-    df.take(5).show()
-    '''
+    #df.filter(df.page == "NextSong")
     # extract columns for users table    
-    artists_table = 
-    
-    # write users table to parquet files
-    artists_table
+    user_table = df.filter(df.page == "NextSong").select(["userId", "firstName", "lastName", "gender", "level"]).dropDuplicates().show(10)
 
-    # create timestamp column from original timestamp column
-    get_timestamp = udf()
-    df = 
+    # write users table to parquet files
+    #artists_table
+    #out_path = "data/sparkify_log_small.csv"
+    #user_table.write.save(out_path, format="parquet", header=True)
     
     # create datetime column from original timestamp column
     get_datetime = udf()
-    df = 
+    #df = df.withColumn('tsCol', df['ts'].cast('date')).show(10)
+    testing = df.select(from_unixtime(col('ts')/1000).alias('ts')).show(10)
     
     # extract columns to create time table
-    time_table = 
-    
+    time_table = testing.select('ts',
+                           hour('ts').alias('hour'),
+                            year('ts').alias('year')).show(10)
+    '''
     # write time table to parquet files partitioned by year and month
     time_table
 
