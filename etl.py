@@ -62,17 +62,15 @@ def process_log_data(spark, input_data, output_data):
     #user_table.write.save(out_path, format="parquet", header=True)
     
     # create datetime column from original timestamp column
-    get_datetime = udf()
+    get_datetime = udf(lambda x : from_unixtime(x/1000))
     #df = df.withColumn('tsCol', df['ts'].cast('date')).show(10)
-    testing = df.select(from_unixtime(col('ts')/1000).alias('ts')).show(10)
+    df = df.withColumn("test", from_unixtime(df['ts']/1000)).show(10)
     
     # extract columns to create time table
-    time_table = testing.select('ts',
-                           hour('ts').alias('hour'),
-                            year('ts').alias('year')).show(10)
+    #time_table = testing.select('ts', hour('ts').alias('hour'), year('ts').alias('year')).show(10)
     '''
     # write time table to parquet files partitioned by year and month
-    time_table
+    time_table 
 
     # read in song data to use for songplays table
     song_df = 
