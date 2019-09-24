@@ -62,12 +62,22 @@ def process_log_data(spark, input_data, output_data):
     #user_table.write.save(out_path, format="parquet", header=True)
     
     # create datetime column from original timestamp column
-    get_datetime = udf(lambda x : from_unixtime(x/1000))
-    #df = df.withColumn('tsCol', df['ts'].cast('date')).show(10)
-    df = df.withColumn("test", from_unixtime(df['ts']/1000)).show(10)
+    get_hour = udf(lambda x: datetime.fromtimestamp(x / 1000.0).hour)
+    get_day = udf(lambda x: datetime.fromtimestamp(x / 1000.0).day)
+    get_week = udf(lambda x: datetime.fromtimestamp(x / 1000.0).date().isocalendar()[1])
+    get_month = udf(lambda x: datetime.fromtimestamp(x / 1000.0).month)
+    get_year = udf(lambda x: datetime.fromtimestamp(x / 1000.0).year)
+    get_dow = udf(lambda x: datetime.fromtimestamp(x / 1000.0).date().weekday())
     
     # extract columns to create time table
-    #time_table = testing.select('ts', hour('ts').alias('hour'), year('ts').alias('year')).show(10)
+    user_log = df.withColumn("hour", get_hour(df.ts))\
+            .withColumn("day", get_day(df.ts))\
+            .withColumn("week_of_year", get_week(df.ts))\
+            .withColumn("month", get_month(df.ts))\
+            .withColumn("year", get_year(df.ts))\
+            .withColumn("dow", get_dow(df.ts))\
+            .select(["ts", "hour", "day", "week_of_year", "month", "year", "dow"])\
+            .dropDuplicates().show(10)
     '''
     # write time table to parquet files partitioned by year and month
     time_table 
