@@ -25,22 +25,28 @@ def create_spark_session():
 
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
-    '''
+    song_data = input_data + 'song_data/A/A/A/*.json'   # Subset of file, improve performance
     # read song data file
-    df = 
+    df = spark.read.json(song_data)
 
     # extract columns to create songs table
-    songs_table = 
+    songs_table = df.dropna(how = "any", subset = ["song_id"])\
+                .filter(df["song_id"] != "")\
+                .select(["song_id", "title", "artist_id", "year", "duration"])\
+                .dropDuplicates().show(10)
     
     # write songs table to parquet files partitioned by year and artist
-    songs_table
+    # songs_table
 
     # extract columns to create artists table
-    artists_table = 
+    artists_table = df.dropna(how = "any", subset = ["artist_id"])\
+                  .filter(df["artist_id"] != "")\
+                  .select(["artist_id", "artist_name", "artist_location", "artist_latitude", "artist_longitude"])\
+                  .dropDuplicates().show(10)
     
     # write artists table to parquet files
-    artists_table
-    '''
+    #artists_table
+    
 
 def process_log_data(spark, input_data, output_data):
     
