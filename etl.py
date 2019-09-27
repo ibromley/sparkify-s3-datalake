@@ -12,6 +12,7 @@ config.read('dl.cfg')
 os.environ['AWS_ACCESS_KEY_ID']=config.get('AWS','AWS_ACCESS_KEY_ID')
 os.environ['AWS_SECRET_ACCESS_KEY']=config.get('AWS','AWS_SECRET_ACCESS_KEY')
 
+
 def create_spark_session():
     spark = SparkSession \
         .builder \
@@ -23,14 +24,14 @@ def create_spark_session():
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
     
-    song_data = input_data + 'song_data/A/A/A/*.json'
+    song_data = input_data + 'song_data/A/A/*/*.json'
     
     # read song data file
     df = spark.read.json(song_data)
 
     # extract columns to create songs table
     song_table = df.dropna(how = "any", subset = ["song_id", "artist_id"])\
-                .filter(df["song_id"] != "")\
+                .where(df["song_id"].isNotNull())\
                 .select(["song_id", "title", "artist_id", "year", "duration"])\
                 .dropDuplicates()
     
@@ -39,7 +40,7 @@ def process_song_data(spark, input_data, output_data):
 
     # extract columns to create artists table
     artist_table = df.dropna(how = "any", subset = ["artist_id"])\
-                  .filter(df["artist_id"] != "")\
+                  .where(df["artist_id"].isNotNull())\
                   .select(["artist_id", "artist_name", "artist_location", "artist_latitude", "artist_longitude"])\
                   .dropDuplicates()
     
@@ -48,7 +49,7 @@ def process_song_data(spark, input_data, output_data):
 
 def process_log_data(spark, input_data, output_data):
     # get filepath to log data file
-    log_data = input_data + 'log-data/2018/11/2018-11-30-events.json'
+    log_data = input_data + 'log-data/2018/*/*.json'
 
     # read log data file
     df = spark.read.json(log_data)
@@ -58,6 +59,7 @@ def process_log_data(spark, input_data, output_data):
 
     # extract columns for users table    
     user_table = df.filter(df.page == "NextSong")\
+                   .where(df["userId"].isNotNull())\
                    .select(["userId", "firstName", "lastName", "gender", "level"])\
                    .dropDuplicates()
     
