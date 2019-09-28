@@ -24,7 +24,7 @@ def create_spark_session():
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
     
-    song_data = input_data + 'song_data/A/A/*/*.json'
+    song_data = input_data + 'song_data/*/*/*/*.json'
     
     # read song data file
     df = spark.read.json(song_data)
@@ -36,7 +36,7 @@ def process_song_data(spark, input_data, output_data):
                 .dropDuplicates()
     
     # write songs table to parquet files partitioned by year and artist
-    song_table.write.parquet(output_data + "song_table.parquet")
+    song_table.write.mode("overwrite").parquet(output_data + "song_table.parquet")
 
     # extract columns to create artists table
     artist_table = df.dropna(how = "any", subset = ["artist_id"])\
@@ -45,11 +45,11 @@ def process_song_data(spark, input_data, output_data):
                   .dropDuplicates()
     
     # write artists table to parquet files
-    artist_table.write.parquet(output_data + "artist_table.parquet")
+    artist_table.write.mode("overwrite").parquet(output_data + "artist_table.parquet")
 
 def process_log_data(spark, input_data, output_data):
     # get filepath to log data file
-    log_data = input_data + 'log-data/2018/*/*.json'
+    log_data = input_data + 'log-data/*/*/*.json'
 
     # read log data file
     df = spark.read.json(log_data)
@@ -64,7 +64,7 @@ def process_log_data(spark, input_data, output_data):
                    .dropDuplicates()
     
     # write users table to parquet files
-    user_table.write.parquet(output_data + "user_table.parquet")
+    user_table.write.mode("overwrite").parquet(output_data + "user_table.parquet")
     
     # create timestamp column from original timestamp column
     #get_timestamp = udf(lambda x: to_timestamp(x / 1000.0)
@@ -85,7 +85,7 @@ def process_log_data(spark, input_data, output_data):
 
     
     # write time table to parquet files partitioned by year and month
-    time_table.write.parquet(output_data + "time_table.parquet")
+    time_table.write.mode("overwrite").partitionBy("year", "month").parquet(output_data + "time_table.parquet")
 '''
     # read in song data to use for songplays table
     song_df = 
