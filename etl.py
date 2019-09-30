@@ -96,12 +96,12 @@ def process_log_data(spark, input_data, output_data):
     song_df = spark.read.parquet(output_data + "songs.parquet") 
     songplays_table = (df.join(song_df, df.song == song_df.title, how="left")
                          .withColumn("songplay_id", monotonically_increasing_id())
-                         .selectExpr("songplay_id", "start_time", "userId as user_id", "level", 
-                                    "song_id", "artist_id", "sessionId as session_id", "location", 
-                                    "userAgent as user_agent"))
+                         .withColumn("year", year(df.start_time))
+                         .withColumn("month", month(df.start_time))
+                         .selectExpr("songplay_id", "start_time", "year", "month", "userId as user_id", "level", 
+                                     "song_id", "artist_id", "sessionId as session_id", "location", 
+                                     "userAgent as user_agent"))
     (songplays_table.write.mode("overwrite")
-                          .withColumn("year", year(df.start_time))
-                          .withColumn("month", month(df.start_time))
                           .partitionBy("year", "month")
                           .parquet(output_data + "songplays.parquet"))
 
@@ -113,8 +113,8 @@ def main():
     after sucessful execution.
     '''
     spark = create_spark_session()
-    input_data = "s3a://udacity-dend/"
-    output_data = "s3a://sparkify-ib/"
+    input_data = config.get('S3','INPUT_DATA')
+    output_data = config.get('S3','OUTPUT_DATA')
     
     process_song_data(spark, input_data, output_data)    
     process_log_data(spark, input_data, output_data)
