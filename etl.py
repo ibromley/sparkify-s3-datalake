@@ -34,9 +34,7 @@ def process_song_data(spark, input_data, output_data):
         input_data : input S3 bucket path containing .json files
         output_data : output S3 bucket path containing .parquet files
     '''
-    # get filepath to song data file
-    #song_data = input_data + "song_data/"
-    song_data = input_data + 'song_data/A/A/A/*.json'
+    song_data = input_data + "song_data/"
     df = spark.read.json(song_data)
 
     # Songs table
@@ -65,9 +63,7 @@ def process_log_data(spark, input_data, output_data):
         input_data : input S3 bucket path containing .json files
         output_data : output S3 bucket path containing .parquet files
     '''
-    # get filepath to log data file
-    #log_data = input_data + "log-data/"
-    log_data = input_data + "log-data/2018/11/2018-11-12-events.json"
+    log_data = input_data + "log-data/"
     df = spark.read.json(log_data)
     df = df.filter(df.page == "NextSong")
 
